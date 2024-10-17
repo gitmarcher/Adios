@@ -1,17 +1,23 @@
-import { useState } from "react";
-import { Button } from "react-bootstrap";
-import "./App.css";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import LoginPage from './components/LoginPage';
+import StudentLogin from './components/StudentLogin';
+import FacultyLogin from './components/FacultyLogin';
+import StudentDashboard from './components/StudentDashboard';
+import LeaveApplicationForm from './components/LeaveApplicationForm';
 
-function App() {
-  const [count, setCount] = useState(0);
-
+const App = () => {
   return (
-    <>
-      <h1>Hello, world!</h1>
-      <p>You clicked {count} times</p>
-      <Button onClick={() => setCount(count + 1)}>Click me</Button>
-    </>
+    <div className="app">
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/student-login" element={<StudentLogin />} />
+        <Route path="/faculty-login" element={<FacultyLogin />} />
+        <Route path="/student-dashboard" element={<StudentDashboard />} />
+        <Route path="/leave-application" element={<LeaveApplicationForm />} />
+      </Routes>
+    </div>
   );
-}
+};
 
 export default App;
