@@ -87,8 +87,9 @@ A comprehensive system for managing student leave requests in an educational ins
 
    ```plaintext
    PORT=5000
-   DATABASE_URL=your_database_url
-   JWT_SECRET=your_jwt_secret
+   DATABASE_KEY = YOUR_DATABASE_KEY
+   DATABASE_URL = YOUR_DATABASE_URL
+
    ```
 
 3. **Run the backend server**:
