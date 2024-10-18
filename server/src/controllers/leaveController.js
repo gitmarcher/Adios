@@ -1,4 +1,6 @@
 const supabase = require('../config/database');
+const CustomError = require('../utils/customError');
+
 
 const createLeave = async (req, res) => {
   try {
@@ -11,24 +13,19 @@ const createLeave = async (req, res) => {
       .select('*')
       .eq('roll_number', roll_number);
 
-    if (existingError) {
-      console.error('Error checking existing leave applications:', existingError);
-      return res.status(500).json({ error: 'Failed to check existing leave applications', details: existingError });
-    }
-
     if (existingApplications && existingApplications.length > 0) {
-      return res.status(400).json({ error: 'Leave application already exists' });
+      throw new CustomError('LEAVE_APPLICATION_EXISTS', 400);
     }
 
     const startDate = new Date(from_date.replace(/th|st|nd|rd/g, '').trim()).toISOString();
     const endDate = new Date(to_date.replace(/th|st|nd|rd/g, '').trim()).toISOString();
 
-    if(startDate > endDate) {
-      return res.status(400).json({ error: 'Invalid date range' });
+    if (startDate > endDate) {
+      throw new CustomError('INVALID_DATE_RANGE', 400); 
     }
 
-    if(startDate < new Date().toISOString()) {
-      return res.status(400).json({ error: 'Start date cannot be in the past' });
+    if (startDate < new Date().toISOString()) {
+      throw new CustomError('START_DATE_CANNONT_BE_IN_PAST', 400);
     }
 
     console.log('Database URL:', process.env.DATABASE_URL);
@@ -57,14 +54,19 @@ const createLeave = async (req, res) => {
 
     res.status(201).json({ message: 'Leave application created successfully', data: newApplicationData });
   } catch (error) {
-    console.error('Error:', error);
+
+    if (error instanceof CustomError) {
+      return res.status(error.code).json({ error: error.message }); 
+    }
+
     res.status(500).json({ error: 'Failed to create leave application' });
   }
 };
 
+
 const deleteLeave = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { roll_number } = req.body;
 
     const { data: existingApplications, error: existingError } = await supabase
     .from('Leave_Applications')

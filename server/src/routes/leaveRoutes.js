@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.post('/create_leave', createLeave);
 
-router.delete('/delete_leave/:id', deleteLeave);
+router.delete('/delete_leave', deleteLeave);
 
 module.exports = router;
