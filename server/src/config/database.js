@@ -1,3 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(process.env.DATABASE_URL,process.env.DATABASE_KEY);
+// Initialize Supabase client
+const SUPABASE_URL = process.env.DATABASE_URL;
+const SUPABASE_KEY = process.env.DATABASE_KEY;
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+module.exports = supabase;

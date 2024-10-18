@@ -1,10 +1,11 @@
 const express = require('express');
-const { getAllLeaves, createLeave } = require('../controllers/leaveController');
+const {  createLeave,deleteLeave } = require('../controllers/leaveController');
 
 const router = express.Router();
 
-router.get('/', getAllLeaves);
 
-router.post('/', createLeave);
+router.post('/create_leave', createLeave);
+
+router.delete('/delete_leave/:id', deleteLeave);
 
 module.exports = router;
