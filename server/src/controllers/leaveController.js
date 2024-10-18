@@ -71,7 +71,7 @@ const deleteLeave = async (req, res) => {
     const { data: existingApplications, error: existingError } = await supabase
     .from('Leave_Applications')
     .select('*')
-    .eq('roll_number', id);
+    .eq('roll_number', roll_number);
 
     if(!existingApplications || existingApplications.length === 0) {
       return res.status(404).json({ error: 'Leave application not found' });
@@ -84,7 +84,7 @@ const deleteLeave = async (req, res) => {
     const { data: deleteData, error: deleteError } = await supabase
       .from('Leave_Applications')
       .delete()
-      .eq('roll_number', id);
+      .eq('roll_number', roll_number);
 
     if (deleteError) {
       console.error('Delete error:', deleteError);
