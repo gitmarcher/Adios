@@ -14,18 +14,18 @@ const createLeave = async (req, res) => {
       .eq('roll_number', roll_number);
 
     if (existingApplications && existingApplications.length > 0) {
-      throw new CustomError('LEAVE_APPLICATION_EXISTS', 400);
+      throw new CustomError('LEAVE_APPLICATION_EXISTS', 405);
     }
 
     const startDate = new Date(from_date.replace(/th|st|nd|rd/g, '').trim()).toISOString();
     const endDate = new Date(to_date.replace(/th|st|nd|rd/g, '').trim()).toISOString();
 
     if (startDate > endDate) {
-      throw new CustomError('INVALID_DATE_RANGE', 400); 
+      throw new CustomError('INVALID_DATE_RANGE', 406); 
     }
 
     if (startDate < new Date().toISOString()) {
-      throw new CustomError('START_DATE_CANNONT_BE_IN_PAST', 400);
+      throw new CustomError('START_DATE_CANNONT_BE_IN_PAST', 406);
     }
 
     console.log('Database URL:', process.env.DATABASE_URL);
@@ -43,7 +43,7 @@ const createLeave = async (req, res) => {
         faculty_approval: "pending",
         warden_approval: "pending",
         academics_approval: "pending",
-        status: 'faculty_advisor',
+        status: 'Parent Consent Pending',
       },
     ]);
 
@@ -74,11 +74,11 @@ const deleteLeave = async (req, res) => {
     .eq('roll_number', roll_number);
 
     if(!existingApplications || existingApplications.length === 0) {
-      return res.status(404).json({ error: 'Leave application not found' });
+      throw new CustomError('LEAVE_APPLICATION_NOT_FOUND', 404);
     }
 
     if(existingApplications && existingApplications[0].status === 'active') {
-      return res.status(400).json({ error: 'Cannot delete active leave application' });
+      throw new CustomError('LEAVE_APPLICATION_ACTIVE', 407);
     }
 
     const { data: deleteData, error: deleteError } = await supabase
@@ -93,6 +93,9 @@ const deleteLeave = async (req, res) => {
 
     res.status(200).json({ message: 'Leave application deleted successfully', data: deleteData });
   } catch (error) {
+    if (error instanceof CustomError) {
+      return res.status(error.code).json({ error: error.message });
+    }
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to delete leave application' });
   }
