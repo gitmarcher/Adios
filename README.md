@@ -10,12 +10,6 @@ Adios is a multi-level leave management system designed for institutes to handle
 3. [Database Schema](#database-schema)
 4. [System Workflow](#system-workflow)
 5. [Installation](#installation)
-6. [Backend Directory Structure](#backend-directory-structure)
-7. [API Routes](#api-routes)
-8. [Usage](#usage)
-9. [Contributing](#contributing)
-10. [License](#license)
-11. [Contact](#contact)
 
 ---
 
@@ -36,7 +30,6 @@ Adios is a multi-level leave management system designed for institutes to handle
 ### Backend
 - **Node.js & Express**: Server-side logic and API routes
 - **PostgreSQL**: Relational database for storing data
-- **JWT**: User authentication
 
 ### Hosting
 - **Supabase**: Database as a service (PostgreSQL)
@@ -75,3 +68,39 @@ The system uses the following primary tables:
    ```bash
    git clone https://github.com/your-username/adios.git
    cd adios
+# Leave Management System
+
+A comprehensive system for managing student leave requests in an educational institution.
+
+## Quick Start
+
+1. **Install dependencies for both frontend and backend**:
+
+   ```bash
+   cd backend
+   npm install
+   cd ../frontend
+   npm install
+   ```
+
+2. **Create a `.env` file in the backend directory**:
+
+   ```plaintext
+   PORT=5000
+   DATABASE_URL=your_database_url
+   JWT_SECRET=your_jwt_secret
+   ```
+
+3. **Run the backend server**:
+
+   ```bash
+   cd backend
+   npm run dev
+   ```
+
+4. **Run the frontend**:
+
+   ```bash
+   cd frontend
+   npm start
+   ```
