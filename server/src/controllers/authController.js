@@ -1,5 +1,6 @@
 const supabase = require('../config/database');
 const bcrypt = require('bcrypt');
+const CustomError = require('../utils/CustomError');
 
 const studentLogin = async (req, res) => {
     const { roll_number, password } = req.body
@@ -12,19 +13,22 @@ const studentLogin = async (req, res) => {
                     .single();
 
         if (error || !users){
-            throw new Error("Invalid Credentials");         
+            throw new CustomError("Invalid Credentials", 401);        
         }
         const isPasswordMatch = await bcrypt.compare(password, users.password);
         
         if (!isPasswordMatch){
-            throw new Error("Invalid Credentials");
+            throw new CustomError("Invalid Credentials", 401);
         }
 
         res.status(200).json({ message: "Login successful", user: users.roll_number}); 
         return users;
     }
     catch(e){
-        res.status(401).send(e.message)
+        if (e instanceof CustomError) {
+            return res.status(e.code).json({ error: e.message }); 
+        }
+        // res.status(401).send(e.message)
     }
 }
 
@@ -84,4 +88,4 @@ const facultyLogin = async (req, res) => {
     }
 }
 
-module.exports = {studentLogin, parentLogin, facultyLogin}
+module.exports = {studentLogin, parentLogin, facultyLogin};
