@@ -4,12 +4,13 @@ import { RoleContext } from "../context/roleContext";
 import { UsernameContext } from "../context/UsernameContext";
 import { StudentDetails, DeleteLeaveStudent } from "../API/details";
 import { VscAccount } from "react-icons/vsc";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, set } from "date-fns";
 import { SlOptions } from "react-icons/sl";
 import { SiGoogleforms } from "react-icons/si";
 import { showErrorToast, showSuccessToast } from "../utils/toastConfig";
 import { LuRefreshCcw } from "react-icons/lu";
 import NavBar from "./NavBar";
+import { HashLoader } from "react-spinners";
 
 const StudentDashboard = () => {
   const { role } = useContext(RoleContext);
@@ -18,12 +19,14 @@ const StudentDashboard = () => {
 
   const [userDetails, setUserDetails] = useState(null);
   const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(true); // State for loader
 
   useEffect(() => {
     if (!username) return; // Prevent API call if username is not set
 
     const getDetails = async () => {
       try {
+        setLoading(true); // Show loader while fetching data
         const { userDetails, leaves } = await StudentDetails(username);
         if (userDetails && leaves) {
           setUserDetails(userDetails);
@@ -34,6 +37,8 @@ const StudentDashboard = () => {
       } catch (error) {
         console.error("Error fetching student details:", error);
         showErrorToast("Error fetching student details.");
+      } finally {
+        setLoading(false); // Hide loader after data is fetched
       }
     };
 
@@ -47,7 +52,6 @@ const StudentDashboard = () => {
   }, [role, navigate]);
 
   const handleViewDetails = (leave) => {
-    // Redirect to the LeaveDetails component with leave_id and roll_number
     navigate(
       `/leave_details?leave_id=${leave.leave_id}&roll_number=${leave.roll_number}`
     );
@@ -55,6 +59,7 @@ const StudentDashboard = () => {
 
   const getDetails = async () => {
     try {
+      setLoading(true);
       const { userDetails, leaves } = await StudentDetails(username);
       if (userDetails && leaves) {
         setUserDetails(userDetails);
@@ -65,6 +70,8 @@ const StudentDashboard = () => {
     } catch (error) {
       console.error("Error fetching student details:", error);
       showErrorToast("Error fetching student details.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,6 +91,7 @@ const StudentDashboard = () => {
   const handleDeleteLeave = async (leaveId) => {
     try {
       console.log("deleting leave", leaveId);
+      setLoading(true);
       const response = await DeleteLeaveStudent(leaveId);
       if (response.success) {
         handleCancelLeave(leaveId);
@@ -94,6 +102,8 @@ const StudentDashboard = () => {
     } catch (error) {
       console.error("Error deleting leave:", error);
       showErrorToast("Error deleting leave");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,7 +126,7 @@ const StudentDashboard = () => {
         >
           Refresh <LuRefreshCcw />
         </button>
-        <div className="mt-4  shadow-md rounded-lg">
+        <div className="mt-4 shadow-md rounded-lg">
           <div className="grid grid-cols-6 gap-4 bg-gray-100 p-4 font-semibold">
             <div className="text-center">Date</div>
             <div className="text-center">From Date</div>
@@ -137,7 +147,7 @@ const StudentDashboard = () => {
                 <div className="text-center">{formatDate(leave.start)}</div>
                 <div className="text-center">{formatDate(leave.end)}</div>
                 <div className="text-center">{leave.status}</div>
-                <div className="flex justify-center ">
+                <div className="flex justify-center">
                   <SiGoogleforms
                     className="cursor-pointer"
                     onClick={() => handleViewDetails(leave)}
@@ -200,8 +210,16 @@ const StudentDashboard = () => {
   return (
     <div className="text-black flex flex-col min-h-screen">
       <NavBar />
-      <UserInfo />
-      <LeaveDetailsTable leaves={leaves} />
+      {loading ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <HashLoader size={80} color="#3B82F6" />
+        </div>
+      ) : (
+        <>
+          <UserInfo />
+          <LeaveDetailsTable leaves={leaves} />
+        </>
+      )}
     </div>
   );
 };

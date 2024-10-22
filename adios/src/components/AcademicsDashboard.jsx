@@ -10,6 +10,7 @@ import { showErrorToast, showSuccessToast } from "../utils/toastConfig";
 import { AcademicsDetails } from "../API/details";
 import { AcademicsApproval } from "../API/approvals";
 import NavBar from "./NavBar";
+import { HashLoader } from "react-spinners";
 
 const AcademicsDashboard = () => {
   const { role } = useContext(RoleContext);
@@ -17,6 +18,7 @@ const AcademicsDashboard = () => {
   const navigate = useNavigate();
 
   const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(true); // Loader state
 
   const handleViewDetails = (leave) => {
     // Redirect to the LeaveDetails component with leave_id and roll_number
@@ -44,6 +46,8 @@ const AcademicsDashboard = () => {
       } catch (error) {
         console.error("Error fetching student details:", error);
         showErrorToast("Error fetching student details.");
+      } finally {
+        setLoading(false); // Stop loading after fetching data
       }
     };
 
@@ -71,17 +75,20 @@ const AcademicsDashboard = () => {
 
   const handleApproveLeave = async (leaveId) => {
     try {
-      console.log("deleting leave", leaveId);
+      setLoading(true); // Start loading when approving leave
+      console.log("Approving leave", leaveId);
       const response = await AcademicsApproval(leaveId);
       if (response.success) {
         handleCancelLeave(leaveId);
         showSuccessToast("Leave approved successfully");
       } else {
-        throw new Error("Delete failed");
+        throw new Error("Approval failed");
       }
     } catch (error) {
-      console.error("Error deleting leave:", error);
-      showErrorToast("Error deleting leave");
+      console.error("Error approving leave:", error);
+      showErrorToast("Error approving leave");
+    } finally {
+      setLoading(false); // Stop loading after approval
     }
   };
 
@@ -105,14 +112,14 @@ const AcademicsDashboard = () => {
         {leaves.length > 0 ? (
           leaves.map((leave, index) => (
             <div
-              key={leave.id}
+              key={leave.leave_id}
               className="grid grid-cols-6 gap-4 p-4 border-b border-gray-200 hover:bg-gray-50 relative"
             >
               <div className="text-center">{leave.roll_number}</div>
               <div className="text-center">{formatDate(leave.start)}</div>
               <div className="text-center">{formatDate(leave.end)}</div>
               <div className="text-center">{leave.status}</div>
-              <div className="flex justify-center ">
+              <div className="flex justify-center">
                 <SiGoogleforms
                   className="cursor-pointer"
                   onClick={() => handleViewDetails(leave)}
@@ -126,7 +133,7 @@ const AcademicsDashboard = () => {
                 {openMenuIndex === index && (
                   <div className="absolute right-0 mt-8 w-48 bg-white rounded-md shadow-xl z-50">
                     <button
-                      className="w-full text-center py-2  bg-white"
+                      className="w-full text-center py-2 bg-white"
                       onClick={() => handleApproveLeave(leave.leave_id)}
                     >
                       Approve Leave
@@ -157,6 +164,14 @@ const AcademicsDashboard = () => {
       </div>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <HashLoader size={50} color="#3B82F6" />
+      </div>
+    );
+  }
 
   return (
     <div className="text-black flex flex-col min-h-screen">

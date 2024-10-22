@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { RoleContext } from "../context/roleContext";
 import { UsernameContext } from "../context/UsernameContext";
 import { VscAccount } from "react-icons/vsc";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, set } from "date-fns";
 import { SlOptions } from "react-icons/sl";
 import { SiGoogleforms } from "react-icons/si";
 import { showErrorToast, showSuccessToast } from "../utils/toastConfig";
 import { WardenDetails } from "../API/details";
 import { WardenApproval } from "../API/approvals";
 import NavBar from "./NavBar";
+import { HashLoader } from "react-spinners";
 
 const WardenDashboard = () => {
   const { role } = useContext(RoleContext);
@@ -17,6 +18,7 @@ const WardenDashboard = () => {
   const navigate = useNavigate();
 
   const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!username) return;
@@ -37,6 +39,8 @@ const WardenDashboard = () => {
       } catch (error) {
         console.error("Error fetching student details:", error);
         showErrorToast("Error fetching student details.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -72,6 +76,7 @@ const WardenDashboard = () => {
   const handleApproveLeave = async (leaveId) => {
     try {
       console.log("deleting leave", leaveId);
+      setLoading(true);
       const response = await WardenApproval(leaveId, username);
       console.log(response);
       if (response.success) {
@@ -83,8 +88,18 @@ const WardenDashboard = () => {
     } catch (error) {
       console.error("Error deleting leave:", error);
       showErrorToast("Error deleting leave");
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <HashLoader size={50} color="#3B82F6" />
+      </div>
+    );
+  }
 
   const LeaveDetailsTable = ({ leaves }) => {
     const [openMenuIndex, setOpenMenuIndex] = useState(null);

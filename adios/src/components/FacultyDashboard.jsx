@@ -9,20 +9,23 @@ import { SiGoogleforms } from "react-icons/si";
 import { showErrorToast, showSuccessToast } from "../utils/toastConfig";
 import { FacultyDetails } from "../API/details";
 import { FacultyApproval } from "../API/approvals";
+import { HashLoader } from "react-spinners";
 import NavBar from "./NavBar";
 
-const StudentDashboard = () => {
+const FacultyDashboard = () => {
   const { role } = useContext(RoleContext);
   const { username } = useContext(UsernameContext);
   const navigate = useNavigate();
 
   const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!username) return;
 
     const getDetails = async () => {
       try {
+        setLoading(true);
         const { success, leaves } = await FacultyDetails(username);
         if (success) {
           if (leaves.length > 0) {
@@ -36,6 +39,8 @@ const StudentDashboard = () => {
       } catch (error) {
         console.error("Error fetching student details:", error);
         showErrorToast("Error fetching student details.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -63,6 +68,7 @@ const StudentDashboard = () => {
 
   const handleApproveLeave = async (leaveId) => {
     try {
+      setLoading(true);
       const response = await FacultyApproval(leaveId, username);
       if (response.success) {
         handleCancelLeave(leaveId);
@@ -73,8 +79,18 @@ const StudentDashboard = () => {
     } catch (error) {
       console.error("Error approving leave:", error);
       showErrorToast("Error approving leave");
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <HashLoader size={50} color="#3B82F6" />
+      </div>
+    );
+  }
 
   const LeaveDetailsTable = ({ leaves }) => {
     const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -165,4 +181,4 @@ const StudentDashboard = () => {
   );
 };
 
-export default StudentDashboard;
+export default FacultyDashboard;

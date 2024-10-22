@@ -11,6 +11,7 @@ import Webcam from "react-webcam";
 import { showErrorToast, showSuccessToast } from "../utils/toastConfig";
 import { ParentDetails } from "../API/details";
 import ParentApproval from "../API/approvals";
+import { HashLoader } from "react-spinners";
 
 const ParentDashboard = () => {
   const { role } = useContext(RoleContext);
@@ -19,18 +20,25 @@ const ParentDashboard = () => {
 
   const [userDetails, setUserDetails] = useState(null);
   const [leaves, setLeaves] = useState([]);
+  const [isFetchingLeaves, setIsFetchingLeaves] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [capturedPhotoURL, setCapturedPhotoURL] = useState(null);
   const [disclaimerChecked, setDisclaimerChecked] = useState(false);
   const [leaveId, setLeaveId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const getDetails = async () => {
-      const { userDetails, leaves } = await ParentDetails(username);
-      console.log(userDetails);
-      setUserDetails(userDetails);
-      setLeaves(leaves);
+      try {
+        const { userDetails, leaves } = await ParentDetails(username);
+        setUserDetails(userDetails);
+        setLeaves(leaves);
+      } catch (error) {
+        showErrorToast("Error fetching leave details.");
+      } finally {
+        setIsFetchingLeaves(false);
+      }
     };
 
     getDetails();
@@ -41,6 +49,92 @@ const ParentDashboard = () => {
       navigate("/");
     }
   }, [role, navigate]);
+
+  const handleViewDetails = (leave) => {
+    // Redirect to the LeaveDetails component with leave_id and roll_number
+    navigate(
+      `/leave_details?leave_id=${leave.leave_id}&roll_number=${leave.roll_number}`
+    );
+  };
+
+  const formatDate = (dateString) => {
+    let date;
+    if (dateString.includes("T")) {
+      date = parseISO(dateString);
+      return format(date, "MMM d, yyyy, hh:mm a");
+    } else {
+      date = parseISO(dateString, "yyyy-MM-dd", new Date());
+    }
+    return format(date, "MMM d, yyyy");
+  };
+
+  // const handleCancelLeave = (leaveId) => {
+  //   setLeaves((prevLeaves) =>
+  //     prevLeaves.filter((leave) => leave.leave_id !== leaveId)
+  //   );
+  // };
+
+  const handleAcceptLeave = async () => {
+    if (!disclaimerChecked) {
+      showErrorToast("Please agree to the disclaimer before proceeding.");
+      return;
+    }
+    if (!capturedPhoto) {
+      showErrorToast("Please capture an Image to proceed.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("parent_image", capturedPhoto);
+    formData.append("roll_number", username);
+    formData.append("leave_id", leaveId);
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await ParentApproval(formData);
+      if (response.success) {
+        showSuccessToast("Leave accepted successfully.");
+        setLeaves((prevLeaves) =>
+          prevLeaves.filter((leave) => leave.leave_id !== leaveId)
+        );
+      } else {
+        showErrorToast("Error accepting leave.");
+      }
+    } catch (error) {
+      showErrorToast("An error occurred while submitting.");
+    } finally {
+      setIsSubmitting(false);
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleCapturePhoto = useCallback((getScreenshot) => {
+    const screenshot = getScreenshot();
+    const blob = dataURLtoBlob(screenshot);
+    const file = new File([blob], "parent_image.jpg", { type: "image/jpeg" });
+    setCapturedPhoto(file);
+    setCapturedPhotoURL(screenshot);
+  }, []);
+
+  const dataURLtoBlob = (dataURL) => {
+    const byteString = atob(dataURL.split(",")[1]);
+    const mimeString = dataURL.split(",")[0].match(/:(.*?);/)[1];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
+  };
+
+  if (isFetchingLeaves) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <HashLoader color="#4A90E2" size={80} />
+      </div>
+    );
+  }
 
   const UserInfo = () => (
     <div className="p-4 rounded-lg flex justify-between items-center mt-8">
@@ -64,73 +158,6 @@ const ParentDashboard = () => {
       )}
     </div>
   );
-
-  const handleViewDetails = (leave) => {
-    // Redirect to the LeaveDetails component with leave_id and roll_number
-    navigate(
-      `/leave_details?leave_id=${leave.leave_id}&roll_number=${leave.roll_number}`
-    );
-  };
-
-  const formatDate = (dateString) => {
-    let date;
-    if (dateString.includes("T")) {
-      date = parseISO(dateString);
-      return format(date, "MMM d, yyyy, hh:mm a");
-    } else {
-      date = parseISO(dateString, "yyyy-MM-dd", new Date());
-    }
-    return format(date, "MMM d, yyyy");
-  };
-
-  const handleCancelLeave = (leaveId) => {
-    setLeaves((prevLeaves) =>
-      prevLeaves.filter((leave) => leave.leave_id !== leaveId)
-    );
-  };
-
-  const handleAcceptLeave = async () => {
-    if (!disclaimerChecked) {
-      showErrorToast("Please agree to the disclaimer before proceeding.");
-      return;
-    }
-    if (!capturedPhoto) {
-      showErrorToast("Please capture an Image to proceed");
-      return;
-    }
-    const formData = new FormData();
-    formData.append("parent_image", capturedPhoto);
-    formData.append("roll_number", username);
-    formData.append("leave_id", leaveId);
-    const response = await ParentApproval(formData);
-    if (response.success) {
-      showSuccessToast("Leave accepted successfully");
-      handleCancelLeave(leaveId);
-    } else {
-      showErrorToast("Error accepting leave");
-    }
-    console.log("Leave accepted with photo:", capturedPhoto);
-    setIsModalOpen(false);
-  };
-
-  const handleCapturePhoto = useCallback((getScreenshot) => {
-    const screenshot = getScreenshot();
-    const blob = dataURLtoBlob(screenshot);
-    const file = new File([blob], "parent_image.jpg", { type: "image/jpeg" });
-    setCapturedPhoto(file);
-    setCapturedPhotoURL(screenshot);
-  }, []);
-
-  const dataURLtoBlob = (dataURL) => {
-    const byteString = atob(dataURL.split(",")[1]);
-    const mimeString = dataURL.split(",")[0].match(/:(.*?);/)[1];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([ab], { type: mimeString });
-  };
 
   const LeaveDetailsTable = ({ leaves }) => {
     const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -211,7 +238,11 @@ const ParentDashboard = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md">
-            {!capturedPhotoURL ? (
+            {isSubmitting ? (
+              <div className="flex justify-center">
+                <HashLoader color="#3B82F6" size={60} />
+              </div>
+            ) : !capturedPhotoURL ? (
               <Webcam
                 audio={false}
                 screenshotFormat="image/jpeg"
