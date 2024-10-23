@@ -55,6 +55,10 @@ const parentConsent = async (req, res) => {
       throw new CustomError('FILE_REQUIRED', 400);
     }
 
+    if (!req.file.mimetype.startsWith('image')) {
+      throw new CustomError('INVALID_FILE_TYPE', 400);
+    }
+
     const fileBuffer = req.file.buffer;
     const fileName = `${roll_number}-${Date.now()}${path.extname(req.file.originalname)}`;
     const { data: uploadData, error: uploadError } = await supabase.storage

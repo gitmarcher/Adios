@@ -8,6 +8,10 @@ const createLeave = async (req, res) => {
 
     const { roll_number, purpose, days, from_date, to_date, address } = req.body;
 
+    if(days<0){
+      throw new CustomError('INVALID_DAYS', 406);
+    }
+
     const startDate = new Date(from_date.replace(/th|st|nd|rd/g, '').trim()).toISOString();
     const endDate = new Date(to_date.replace(/th|st|nd|rd/g, '').trim()).toISOString();
     console.log(startDate, endDate);
