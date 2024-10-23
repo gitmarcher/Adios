@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { getLeaveDetails } from "../API/leaveDetails";
 import { format, parseISO } from "date-fns";
 import HashLoader from "react-spinners/HashLoader";
+import { SyncLoader } from "react-spinners";
 
 const LeaveDetails = () => {
   const { username } = useContext(UsernameContext);
@@ -20,6 +21,7 @@ const LeaveDetails = () => {
   const [studentDetail, setStudentDetail] = useState(null);
   const [parentDetail, setParentDetail] = useState(null);
   const [loading, setLoading] = useState(true); // Loading state
+  const [imageLoading, setImageLoading] = useState(true); // Loading state for images
 
   const formatDate = (dateString) => {
     const date = parseISO(dateString);
@@ -148,12 +150,21 @@ const LeaveDetails = () => {
                   <p className="font-semibold text-gray-700 mb-2">
                     Parent Consent:
                   </p>
-                  <div className="flex justify-center">
+                  <div className="flex justify-center h-64">
+                    {/* {imageLoading ? (
+                      <SyncLoader
+                        color={"#3B82F6"}
+                        loading={imageLoading}
+                        className="flex justify-center items-center"
+                      />
+                    ) : ( */}
                     <img
                       src={leaveDetail.parent_consent}
-                      className="h-48 w-60 rounded-lg object-cover shadow-md"
                       alt="Parent Consent"
+                      className="h-64"
+                      onLoad={() => setImageLoading(false)}
                     />
+                    {/* )} */}
                   </div>
                 </div>
               )}
@@ -164,7 +175,10 @@ const LeaveDetails = () => {
                     Faculty Advisor:
                   </p>
                   <p className="text-gray-600">
-                    Approved by: {leaveDetail.faculty_approval}
+                    <span className="text-xs">Approved by</span>{" "}
+                    <span className="font-bold italic">
+                      {leaveDetail.faculty_approval}
+                    </span>
                   </p>
                 </div>
               )}
@@ -173,7 +187,10 @@ const LeaveDetails = () => {
                 <div className="flex gap-2">
                   <p className="font-semibold text-gray-700">Warden:</p>
                   <p className="text-gray-600">
-                    Approved by: {leaveDetail.warden_approval}
+                    <span className="text-xs">Approved by</span>{" "}
+                    <span className="font-bold italic">
+                      {leaveDetail.warden_approval}
+                    </span>
                   </p>
                 </div>
               )}
