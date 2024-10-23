@@ -156,7 +156,3 @@ Currently deployed on AWS EC2 with the following setup:
 - Project Link: [https://github.com/gitmarcher/adios](https://github.com/gitmarcher/adios)
 
 ---
-
-<div align="center">
-Made with ❤️ for academic institutions
-</div>
