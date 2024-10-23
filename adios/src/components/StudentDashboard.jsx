@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RoleContext } from "../context/roleContext";
+import { RoleContext } from "../context/RoleContext";
 import { UsernameContext } from "../context/UsernameContext";
 import { StudentDetails, DeleteLeaveStudent } from "../API/details";
 import { VscAccount } from "react-icons/vsc";
@@ -91,6 +91,10 @@ const StudentDashboard = () => {
   const handleDeleteLeave = async (leaveId) => {
     try {
       console.log("deleting leave", leaveId);
+      if (leaveId.status === "Active") {
+        showErrorToast("Cannot delete an active leave.");
+        return;
+      }
       setLoading(true);
       const response = await DeleteLeaveStudent(leaveId);
       if (response.success) {

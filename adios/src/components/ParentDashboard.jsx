@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { RoleContext } from "../context/roleContext";
+import { RoleContext } from "../context/RoleContext";
 import { UsernameContext } from "../context/UsernameContext";
 import { VscAccount } from "react-icons/vsc";
 import { format, parseISO } from "date-fns";
@@ -10,7 +10,7 @@ import NavBar from "./NavBar";
 import Webcam from "react-webcam";
 import { showErrorToast, showSuccessToast } from "../utils/toastConfig";
 import { ParentDetails } from "../API/details";
-import ParentApproval from "../API/approvals";
+import { ParentApproval, ParentDisapproval } from "../API/approvals";
 import { HashLoader } from "react-spinners";
 
 const ParentDashboard = () => {
@@ -68,11 +68,24 @@ const ParentDashboard = () => {
     return format(date, "MMM d, yyyy");
   };
 
-  // const handleCancelLeave = (leaveId) => {
-  //   setLeaves((prevLeaves) =>
-  //     prevLeaves.filter((leave) => leave.leave_id !== leaveId)
-  //   );
-  // };
+  const handleCancelLeave = async (leaveId) => {
+    try {
+      setIsSubmitting(true);
+      const response = await ParentDisapproval(leaveId);
+      if (response.success) {
+        showSuccessToast("Leave rejected successfully.");
+        setLeaves((prevLeaves) =>
+          prevLeaves.filter((leave) => leave.leave_id !== leaveId)
+        );
+      } else {
+        showErrorToast("Error rejecting leave.");
+      }
+    } catch (error) {
+      showErrorToast("An error occurred while rejecting.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleAcceptLeave = async () => {
     if (!disclaimerChecked) {
@@ -207,13 +220,19 @@ const ParentDashboard = () => {
                   className="w-5 h-5 cursor-pointer"
                   onClick={() => toggleMenu(index)}
                 />
-                {openMenuIndex === index && role === "Parents" && (
-                  <div className="absolute right-0 mt-8 w-48 bg-white rounded-md shadow-xl z-50">
+                {openMenuIndex === index && (
+                  <div className="absolute  right-0 mt-8 w-48 bg-white rounded-md shadow-xl z-50">
                     <button
                       className="w-full px-4 py-2 text-left bg-white"
                       onClick={() => openModal(leave.leave_id)}
                     >
                       Accept Leave
+                    </button>
+                    <button
+                      className="w-full px-4 py-2 text-left bg-white"
+                      onClick={() => handleCancelLeave(leave.leave_id)}
+                    >
+                      Reject Leave
                     </button>
                   </div>
                 )}

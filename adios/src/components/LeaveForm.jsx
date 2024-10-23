@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import DateTime from "react-datetime";
 import { UsernameContext } from "../context/UsernameContext";
-import { RoleContext } from "../context/roleContext";
+import { RoleContext } from "../context/RoleContext";
 import { useNavigate } from "react-router-dom";
 import { createLeave } from "../API/crateLeave";
 import { showErrorToast, showSuccessToast } from "../utils/toastConfig";
@@ -31,6 +31,13 @@ const LeaveForm = () => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
+
+    if (id === "days") {
+      if (parseInt(value) === 0) {
+        return;
+      }
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [id]: value

@@ -4,6 +4,7 @@ import api from "../API/index";
 export const login = async (username, password, role) => {
     try {
         let response;
+        console.log(username, password, role);
         if (role === "Student") {
             response = await api.post("/auth/student_login", { roll_number: username, password });
             return {
@@ -36,7 +37,8 @@ export const login = async (username, password, role) => {
     } catch (error) {
         if (error.response) {
             const status = error.response.status;
-
+            console.log(status);
+            console.log(error.response);
             if (status === 401) {
                 return {
                     login: false,

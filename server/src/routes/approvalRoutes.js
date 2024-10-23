@@ -1,5 +1,5 @@
 const express = require('express');
-const {  getLeaves,parentConsent,facultyApproval,facultyAdvisorApplications, wardenApplications, wardenApproval,academicsApplications, academicsApproval } = require('../controllers/approvalController');
+const {  getLeaves,parentConsent,facultyApproval,facultyAdvisorApplications, wardenApplications, wardenApproval,academicsApplications, academicsApproval,parentDisapproval } = require('../controllers/approvalController');
 const multer = require('multer');
 
 const upload = multer();
@@ -22,5 +22,7 @@ router.patch('/warden_approval', wardenApproval);
 router.get('/academics_approval', academicsApplications);
 
 router.patch('/academics_approval', academicsApproval);
+
+router.patch('/parent_disapproval', parentDisapproval);
 
 module.exports = router;

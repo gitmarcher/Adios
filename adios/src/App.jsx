@@ -7,7 +7,7 @@ import StudentDashboard from "./components/StudentDashboard";
 import FacultyDashboard from "./components/FacultyDashboard";
 import WardenDashboard from "./components/WardenDashboard";
 import AcademicsDashboard from "./components/AcademicsDashboard";
-import { RoleContext } from "./context/roleContext";
+import { RoleContext } from "./context/RoleContext";
 import { UsernameContext } from "./context/UsernameContext";
 import { useState } from "react";
 import LeaveForm from "./components/LeaveForm";

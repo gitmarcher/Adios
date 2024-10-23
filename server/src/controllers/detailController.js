@@ -1,5 +1,5 @@
 const supabase = require('../config/database');
-const CustomError = require('../utils/CustomError');
+const CustomError = require('../utils/customError');
 
 const studentDetails = async (req, res) => {
     try {

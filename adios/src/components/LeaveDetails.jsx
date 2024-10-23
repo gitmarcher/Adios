@@ -1,11 +1,11 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { UsernameContext } from "../context/UsernameContext";
-import { RoleContext } from "../context/roleContext";
+import { RoleContext } from "../context/RoleContext";
 import { useNavigate } from "react-router-dom";
 import { getLeaveDetails } from "../API/leaveDetails";
 import { format, parseISO } from "date-fns";
-import HashLoader from "react-spinners/HashLoader"; // Import the HashLoader
+import HashLoader from "react-spinners/HashLoader";
 
 const LeaveDetails = () => {
   const { username } = useContext(UsernameContext);
@@ -164,7 +164,7 @@ const LeaveDetails = () => {
                     Faculty Advisor:
                   </p>
                   <p className="text-gray-600">
-                    {leaveDetail.faculty_approval}
+                    Approved by: {leaveDetail.faculty_approval}
                   </p>
                 </div>
               )}
@@ -172,7 +172,9 @@ const LeaveDetails = () => {
               {leaveDetail.warden_approval !== "pending" && (
                 <div className="flex gap-2">
                   <p className="font-semibold text-gray-700">Warden:</p>
-                  <p className="text-gray-600">{leaveDetail.warden_approval}</p>
+                  <p className="text-gray-600">
+                    Approved by: {leaveDetail.warden_approval}
+                  </p>
                 </div>
               )}
 

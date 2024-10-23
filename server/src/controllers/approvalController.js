@@ -97,6 +97,42 @@ const parentConsent = async (req, res) => {
   }
 };
 
+const parentDisapproval = async (req, res) => {
+  try{
+    const { leave_id } = req.body;
+    const { data: leaveApplications, error: leaveError } = await supabase
+      .from('Leave_Applications')
+      .select('*')
+      .eq('leave_id', leave_id)
+      .eq('status', 'Parent Consent Pending');
+    
+    if (!leaveApplications || leaveApplications.length === 0) {
+      throw new CustomError('LEAVE_APPLICATION_NOT_FOUND', 404);
+    }
+
+    const { data: updatedLeave, error: updateError } = await supabase
+      .from('Leave_Applications')
+      .update({ status: 'Parent Disapproved' })
+      .eq('leave_id', leave_id);
+    
+    if (updateError) {
+      console.error('Update error:', updateError);
+      throw new CustomError('LEAVE_UPDATE_FAILED', 500);
+    }
+
+    res.status(200).json({
+      message: 'Leave application disapproved successfully',
+      data: updatedLeave,
+    });
+  }catch(error){
+    if (error instanceof CustomError) {
+      return res.status(error.code).json({ error: error.message });
+    }
+    console.error('Error:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  };
+};
+
 
 const facultyAdvisorApplications = async (req, res) => {
   try{
@@ -304,7 +340,7 @@ const academicsApproval = async (req,res) => {
 
     const { data: updatedLeave, error: updateError } = await supabase
       .from('Leave_Applications')
-      .update({academics_approval:'Approved', status: 'Active' })
+      .update({academics_approval:'Approved', status: 'Approved' })
       .eq('leave_id', leave_id);
     
     if (updateError) {
@@ -328,6 +364,7 @@ const academicsApproval = async (req,res) => {
 module.exports = {
   getLeaves,
   parentConsent,
+  parentDisapproval,
   facultyApproval,
   facultyAdvisorApplications,
   wardenApplications,

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import api from "../API/index";
+import { ca } from 'date-fns/locale';
 
 const api2 = axios.create({
   baseURL: 'http://localhost:5000/api/', // Base URL
@@ -16,6 +17,17 @@ const ParentApproval = async (formData) => {
         throw error; // Rethrow the error
     }
 };
+
+const ParentDisapproval = async (leave_id) => {
+    try{
+        const response = await api.patch("/approvals/parent_disapproval",{leave_id:leave_id});
+        console.log(response.data);
+        return {success:true};
+    }catch(error){
+        console.error("Error during request:",error);
+        throw error;
+    }
+}
 
 const FacultyApproval = async (leave_id,faculty) => {
     try{
@@ -50,5 +62,5 @@ const AcademicsApproval = async (leave_id) => {
     }
 };
 
-export {ParentApproval,FacultyApproval,WardenApproval,AcademicsApproval};
+export {ParentApproval,FacultyApproval,WardenApproval,AcademicsApproval,ParentDisapproval};
 export default ParentApproval;
